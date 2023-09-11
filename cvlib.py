@@ -8,7 +8,7 @@ def imgreed(filename):
     img = cv.imread(filename, cv.IMREAD_GRAYSCALE)
     return img
 
-def imgview(img):
+def imgview(img,filename):
 
     # asegurar que el array solo contenga datos numericos
     img = img.astype(np.uint8)
@@ -19,9 +19,19 @@ def imgview(img):
     # imprimir imagen en consola
     plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
     plt.title('IMAGE VIEW')
-    plt.axis('off')  # Ocultar ejes
+    plt.axis('on')  # Ocultar ejes
     plt.show()
 
+    try:
+        # Guarda la imagen con el nombre especificado
+        plt.savefig(filename)
+
+        # Cierra la figura (opcional, dependiendo de tu flujo de trabajo)
+        plt.close()
+
+        print(f"La imagen se ha guardado como '{filename}' con éxito.")
+    except Exception as e:
+        print(f"Error al guardar la imagen: {str(e)}")
     return visualizacion
 
 def hist(img):
@@ -69,12 +79,12 @@ def imgcmp(img1, img2):
     # Mostrar imagen1 en el primer subplot
     ax1.imshow(cv.cvtColor(img1, cv.COLOR_BGR2RGB))
     ax1.set_title('Imagen 1')
-    ax1.axis('off')  # Ocultar ejes para la imagen1
+    ax1.axis('on')  # Ocultar ejes para la imagen1
 
     # Mostrar imagen2 en el segundo subplot
     ax2.imshow(cv.cvtColor(img2, cv.COLOR_BGR2RGB))
     ax2.set_title('Imagen 2')
-    ax2.axis('off')  # Ocultar ejes para la imagen2
+    ax2.axis('on')  # Ocultar ejes para la imagen2
 
     # Mostrar la figura con ambas imágenes lado a lado
     plt.tight_layout()
