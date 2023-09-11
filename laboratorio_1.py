@@ -4,8 +4,34 @@
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-import cvlib
+#import cvlib
 import argparse
+
+def imgview(img,filename):
+
+    # asegurar que el array solo contenga datos numericos
+    img = img.astype(np.uint8)
+
+    # Mostrar imagen
+    visualizacion = cv.imshow('Imagen', img)
+
+    # imprimir imagen en consola
+    plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
+    plt.title('IMAGE VIEW')
+    plt.axis('on')  # Ocultar ejes
+    plt.show()
+
+    try:
+        # Guarda la imagen con el nombre especificado
+        plt.savefig(filename)
+
+        # Cierra la figura (opcional, dependiendo de tu flujo de trabajo)
+        plt.close()
+
+        print(f"La imagen se ha guardado como '{filename}' con éxito.")
+    except Exception as e:
+        print(f"Error al guardar la imagen: {str(e)}")
+    return visualizacion
 
 parser = argparse.ArgumentParser(description='Ingreso de parametros desde consola')
 
@@ -159,11 +185,12 @@ def labelview(labels):
             label = labels[i, j]
             colored_labels[i, j] = label_colors[label]
 
-    cvlib.imgview(colored_labels, args.arg2)
+    imgview(colored_labels, args.arg2)
 
 # labels = np.array([[0, 1, 1, 0, 0],
 #                    [0, 2, 2, 2, 0],
 #                    [0, 0, 2, 0, 3],
 #                    [0, 0, 0, 0, 3]])
 
-labelview(connected_c(thresh))               
+labelview(connected_c(thresh))
+
