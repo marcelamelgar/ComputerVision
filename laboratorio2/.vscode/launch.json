@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/estebansamayoa/Documents/GitHub/ComputerVision/laboratorio2",
+      "program": "/Users/estebansamayoa/Documents/GitHub/ComputerVision/laboratorio2/build/Debug/outDebug"
+    }
+  ]
+}
