@@ -1,26 +1,36 @@
 import sys
 import cv2 as cv
 import numpy as np
-import sharpen_cython  # Importa el módulo Cython
-
-#Obtiene el controlador de la cámara
-device_id = 0
-cap = cv.VideoCapture(device_id)
+import sharpen_cython
+import time  # Importa el módulo Cython
 
 
+# Nombre del archivo de video .mp4
+video_file = 'leyendo.mp4'
+
+# Abre el archivo de video
+cap = cv.VideoCapture(video_file)
+
+# Verifica que el archivo de video esté abierto
 if not cap.isOpened():
-    print("Error al abrir la captura de video")
+    print("Error al abrir el archivo de video")
     sys.exit()
+print('si abrio el video')
 
+start_time = time.time()  # Registra el tiempo de inicio
 
+# Inicializa un contador de fotogramas
+frame_count = 0
+
+# Obtiene un fotograma, aplica el procesamiento y muestra los resultados
 while True:
     ret, im_rgb = cap.read()
 
     if ret:
-        # Aplica el efecto HDR utilizando la función Cython
+        # Aplica el efecto HDR
         sharpen_image = sharpen_cython.sharpen_cython(im_rgb)
+        frame_count += 1
 
-        # Crea ventanas
         win0 = 'Original'
         win1 = 'Efecto Sharpen'
 
@@ -44,11 +54,20 @@ while True:
         cv.moveWindow(win0, 0, 0)
         cv.moveWindow(win1, C, 0)
 
-        # Salir con 'q'
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
+
     else:
         break
 
+end_time = time.time()  # Registra el tiempo de finalización
+
+# Calcula el tiempo transcurrido
+elapsed_time = end_time - start_time
+
+print(f"Tiempo total: {elapsed_time:.2f} segundos")
+print(f"Número total de fotogramas procesados: {frame_count}")
+
+# Limpieza antes de salir
 cap.release()
 cv.destroyAllWindows()
