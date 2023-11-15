@@ -1,0 +1,106 @@
+from numpy import mean
+from numpy import std
+import matplotlib.pyplot as plt
+from sklearn.model_selection import KFold
+from keras.datasets import mnist
+from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Conv2D
+from keras.layers import MaxPooling2D
+from keras.layers import Dense
+from keras.layers import Flatten
+from tensorflow.keras.optimizers.legacy import SGD as SGD_legacy
+from sklearn.metrics import f1_score
+from tensorflow import argmax
+import tensorflow as tf
+from tensorflow.keras.metrics import AUC
+import os
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+train_data_dir = '/Users/marcelamelgar/Documents/roundeight/computervision/final/dataset/train'
+validation_data_dir = '/Users/marcelamelgar/Documents/roundeight/computervision/final/dataset/valid'
+
+# Image size and batch size
+img_width, img_height = 28, 28
+batch_size = 32
+
+# Create an ImageDataGenerator for training data
+train_datagen = ImageDataGenerator(
+    rescale=1./255,         # normalize pixel values to [0,1]
+    shear_range=0.2,         # shear transformations
+    zoom_range=0.2,          # zoom transformations
+    horizontal_flip=True     # horizontal flips
+)
+
+# Create an ImageDataGenerator for validation data (only rescaling)
+validation_datagen = ImageDataGenerator(rescale=1./255)
+
+# Load and prepare training data
+train_generator = train_datagen.flow_from_directory(
+    train_data_dir,
+    target_size=(img_width, img_height),
+    batch_size=batch_size,
+    class_mode='categorical'  # for binary classification; use 'categorical' for multiclass
+)
+
+# Load and prepare validation data
+validation_generator = validation_datagen.flow_from_directory(
+    validation_data_dir,
+    target_size=(img_width, img_height),
+    batch_size=batch_size,
+    class_mode='categorical'
+)
+
+num_classes = len(os.listdir(train_data_dir))
+
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=input_shape))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(num_classes, activation='softmax'))
+    
+    # Compile model
+    opt = SGD_legacy(learning_rate=0.01, momentum=0.9)
+    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy', AUC(name='f1')])
+    
+    return model
+
+# Train the CNN model using the ImageDataGenerator
+model = define_cnn_model((img_width, img_height, 3), num_classes)   # Assuming RGB images
+num_train_samples = len(train_generator.filenames)
+num_validation_samples = len(validation_generator.filenames)
+
+# Set eager execution
+tf.config.run_functions_eagerly(True)
+
+# Fit the model
+history = model.fit(
+    train_generator,
+    steps_per_epoch=num_train_samples // batch_size,
+    epochs=10,
+    validation_data=validation_generator,
+    validation_steps=num_validation_samples // batch_size
+)
+
+# Evaluate the model on the test set
+test_generator = validation_datagen.flow_from_directory(
+    validation_data_dir,
+    target_size=(img_width, img_height),
+    batch_size=batch_size,
+    class_mode='categorical',
+    shuffle=False
+)
+
+# Predict the labels for the test set
+predictions = model.predict_generator(test_generator, steps=num_validation_samples // batch_size)
+predicted_labels = [argmax(pred) for pred in predictions]
+
+# Convert one-hot encoded true labels back to categorical labels
+true_labels = test_generator.classes
+
+# Calculate the F1 score
+f1 = f1_score(true_labels, predicted_labels, average='weighted')
+print(f'Test F1 Score: {f1 * 100:.2f}%')
